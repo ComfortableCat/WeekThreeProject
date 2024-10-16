@@ -1,0 +1,20 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  font-family: monospace;
+}
+.upgrade {
+  display: flex;
+  justify-content: center;
+}
+
+p {
+  margin: 0px;
+  padding: 2px;
+}
+
+.affordable {
+  background-color: aqua;
+}
