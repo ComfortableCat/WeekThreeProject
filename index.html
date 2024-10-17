@@ -7,21 +7,20 @@
     <link rel="stylesheet" href="./style.css" />
     <script src="./app.js" defer></script>
   </head>
-  <body>
-    <header>
-      <a>Theme</a>
-      <!-- A MENU OF SOME SORT FOR SETTINGS 
-        DIfferent media layouts
-        (main PC inline)
-        (mobile more reseptive) 
-        -->
-    </header>
+  <body class="dark">
     <div id="cookieAndInfo">
-      <button>Menu</button>
       <h1 id="cookieCount"></h1>
-      <p id="cpsCount"></p>
-      <button id="clicker">COOKIE</button>
+      <h1>Cookies</h1>
+      <p>Cps: <span id="cpsCount"></span></p>
+      <button id="clicker"></button>
     </div>
     <div id="upgradeContainer"></div>
+    <div id="navContainer">
+      <nav>
+        <button id="buildings">Buildings</button>
+        <button id="clickUpgrades">Click Upgrades</button>
+        <button id="settings">Settings</button>
+      </nav>
+    </div>
   </body>
 </html>

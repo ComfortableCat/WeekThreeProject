@@ -1,18 +1,41 @@
+let MultiClickUpgrades = JSON.parse(
+  localStorage.getItem("MultiClickUpgrades")
+) || [
+  { id: 1, name: "Double tap", cost: "150", increase: 2, owned: false },
+  { id: 2, name: "Tap dancer", cost: "750", increase: 10, owned: false },
+  { id: 3, name: "Burning Finger", cost: "1500", increase: 5, owned: false },
+  { id: 4, name: "Carpell tapper", cost: "5000", increase: 2, owned: false },
+  { id: 5, name: "Godly taps", cost: "15000", increase: 2.5, owned: false },
+];
+const icons = [
+  "./images/pointer.webp",
+  "./images/furnace.webp",
+  "./images/Diamond_Hoe.webp",
+  "./images/baker.webp",
+  "./images/factory.png",
+  "./images/flour.png",
+  "./images/clock.webp",
+];
+
 const upgradeDiv = document.getElementById("upgradeContainer");
 const cookieCountDisplay = document.getElementById("cookieCount");
 const cpsCountDisplay = document.getElementById("cpsCount");
-const costIncreasePercent = 105;
+const costIncreasePercent = 102;
 
 //retrieve from local
-let localUpgrades = JSON.parse(localStorage.getItem("localUpgrades")); //need to retrieve and send to local
+let localUpgrades = JSON.parse(localStorage.getItem("localUpgrades"));
 let cps = JSON.parse(localStorage.getItem("cps")) || 0;
 let cookieCount = JSON.parse(localStorage.getItem("cookieCount")) || 0;
 let cookieClickMulti =
   JSON.parse(localStorage.getItem("cookieClickMulti")) || 1;
+let preferences = JSON.parse(localStorage.getItem("preferences")) || {
+  dark: true,
+  volume: 80,
+};
 
 if (localUpgrades) {
   console.log("there is local data");
-  upgradesToPage();
+  builingsToPage();
 } else {
   loadUpgradeAPI();
   console.log(localUpgrades);
@@ -26,7 +49,7 @@ let cpsUpdate = setInterval(() => {
   update();
 }, 100);
 
-let save = setInterval(saveToLocal, 60000);
+let save = setInterval(saveToLocal, 5000);
 
 async function loadUpgradeAPI() {
   const response = await fetch(
@@ -37,68 +60,149 @@ async function loadUpgradeAPI() {
   for (let i = 0; i < upgrades.length; i++) {
     localUpgrades[i].count = "0";
     localUpgrades[i]["currentCost"] = localUpgrades[i]["cost"];
+    console.log("Set currentCost", i);
   }
-  upgradesToPage();
+  builingsToPage();
   saveToLocal();
 }
 
 function saveToLocal() {
+  localStorage.setItem(
+    "MultiClickUpgrades",
+    JSON.stringify(MultiClickUpgrades)
+  );
+  localStorage.setItem("preferences", JSON.stringify(preferences));
   localStorage.setItem("cookieClickMulti", cookieClickMulti);
   localStorage.setItem("cookieCount", cookieCount);
   localStorage.setItem("cps", cps);
   localStorage.setItem("localUpgrades", JSON.stringify(localUpgrades));
 }
 
-function upgradesToPage() {
+function builingsToPage() {
   for (let i = 0; i < localUpgrades.length; i++) {
-    const upgradeCont = document.createElement("div");
+    const btn = document.createElement("button");
+    const img = document.createElement("img");
     const textCont = document.createElement("div");
     const name = document.createElement("p");
     const cost = document.createElement("p");
-    const img = document.createElement("img");
-    const btn = document.createElement("button");
-    const count = document.createElement("p");
-    upgradeCont.classList.add("upgrade");
-    upgradeCont.classList.add(localUpgrades[i]["id"] - 1);
-    textCont.classList.add("textCont");
-    cost.classList.add("cost");
+    const count = document.createElement("h3");
     btn.classList.add("buyBtn");
     btn.classList.add(localUpgrades[i]["id"] - 1);
+    textCont.classList.add("textCont");
+    cost.classList.add("cost");
     count.classList.add("count");
     name.textContent = localUpgrades[i]["name"];
     img.alt = localUpgrades[i]["name"];
+    img.src = icons[i];
     cost.textContent = `Cost: ${localUpgrades[i]["cost"]}`;
     count.textContent = localUpgrades[i]["count"];
-    upgradeCont.appendChild(img);
+    btn.appendChild(img);
     textCont.appendChild(name);
     textCont.appendChild(cost);
-    upgradeCont.appendChild(textCont);
-    upgradeCont.appendChild(btn);
-    upgradeCont.appendChild(count);
-    upgradeDiv.appendChild(upgradeCont);
+    btn.appendChild(textCont);
+    btn.appendChild(count);
+    upgradeDiv.appendChild(btn);
 
-    document
-      .getElementsByClassName(`buyBtn ${i}`)[0]
-      .addEventListener("click", (event) => {
-        console.log("w");
-        upgradePeopleUpgrades(event.target.classList[1]);
-      });
+    btn.addEventListener("click", (event) => {
+      console.log("clicked btn", event);
+      upgradePeopleUpgrades(event.currentTarget.classList[1]);
+    });
   }
+  document.getElementById("buildings").classList.add("active");
 }
 
+function upgradesToPage() {
+  for (let i = 0; i < MultiClickUpgrades.length; i++) {
+    const btn = document.createElement("button");
+    const img = document.createElement("img");
+    const textCont = document.createElement("div");
+    const name = document.createElement("p");
+    const cost = document.createElement("p");
+    btn.classList.add("buyBtn");
+    btn.classList.add(MultiClickUpgrades[i]["id"] - 1);
+    textCont.classList.add("textCont");
+    cost.classList.add("cost");
+    name.textContent = MultiClickUpgrades[i]["name"];
+    img.alt = MultiClickUpgrades[i]["name"];
+    img.src = icons[i];
+    cost.textContent = `Cost: ${MultiClickUpgrades[i]["cost"]}`;
+    btn.appendChild(img);
+    textCont.appendChild(name);
+    textCont.appendChild(cost);
+    btn.appendChild(textCont);
+    upgradeDiv.appendChild(btn);
+
+    btn.addEventListener("click", (event) => {
+      console.log("clicked btn", event);
+      clickUpgradesBought(event.currentTarget.classList[1]);
+    });
+
+    if (MultiClickUpgrades[i]["owned"] === true) {
+      btn.classList.add("bought");
+    }
+  }
+  document.getElementById("clickUpgrades").classList.add("active");
+}
+
+function settingsToPage() {
+  const settingDiv = document.createElement("div");
+  const saveBtn = document.createElement("button");
+  const resetBtn = document.createElement("button");
+  const themeBtn = document.createElement("button");
+  saveBtn.id = "saveBtn";
+  resetBtn.id = "reset";
+  themeBtn.id = "theme";
+  saveBtn.textContent = "Manual Save";
+  resetBtn.textContent = "Reset Game";
+  themeBtn.textContent = "Change theme";
+  saveBtn.addEventListener("click", () => {
+    saveToLocal();
+    alert("Game Saved to Local Storage");
+  });
+  resetBtn.addEventListener("click", () => {
+    localStorage.clear();
+    localStorage.setItem("preferences", JSON.stringify(preferences));
+    location.reload();
+  });
+  themeBtn.addEventListener("click", () => {
+    document.body.classList.toggle("dark");
+  });
+  settingDiv.appendChild(saveBtn);
+  settingDiv.appendChild(resetBtn);
+  settingDiv.appendChild(themeBtn);
+  upgradeDiv.appendChild(settingDiv);
+  document.getElementById("settings").classList.add("active");
+}
 function update() {
   cookieCountDisplay.textContent = cookieCount;
   cpsCountDisplay.textContent = cps;
-  for (let i = 0; i < localUpgrades.length; i++) {
-    buttonCheck(i);
-    document.getElementsByClassName("cost")[
-      i
-    ].textContent = `Cost: ${localUpgrades[i]["currentCost"]}`;
+  if (document.getElementById("buildings").classList.contains("active")) {
+    for (let i = 0; i < localUpgrades.length; i++) {
+      buttonCheck(i);
+      document.getElementsByClassName("cost")[
+        i
+      ].textContent = `Cost: ${localUpgrades[i]["currentCost"]}`;
+      document.getElementsByClassName("count")[i].textContent =
+        localUpgrades[i]["count"];
+    }
+  } else if (
+    document.getElementById("clickUpgrades").classList.contains("active")
+  ) {
+    for (let i = 0; i < MultiClickUpgrades.length; i++) {
+      buttonCheck(i);
+    }
   }
 }
 
 function buttonCheck(a) {
-  if (cookieCount >= localUpgrades[a]["currentCost"]) {
+  if (
+    cookieCount >=
+    Number(
+      document
+        .getElementsByClassName("cost")
+        [a].textContent.replace("Cost: ", "")
+    )
+  ) {
     if (
       document
         .getElementsByClassName("buyBtn")
@@ -120,7 +224,8 @@ function upgradePeopleUpgrades(a) {
       [a].classList.contains("affordable") === true
   ) {
     cps = cps + localUpgrades[a]["increase"];
-    cookieCount = cookieCount - localUpgrades[a]["currentCost"];
+    cookieCount = cookieCount - Number(localUpgrades[a]["currentCost"]);
+    localUpgrades[a]["count"] = Number(localUpgrades[a]["count"]) + 1;
     localUpgrades[a].currentCost =
       localUpgrades[a]["currentCost"] * costIncreasePercent;
     localUpgrades[a].currentCost = (
@@ -133,15 +238,57 @@ function upgradePeopleUpgrades(a) {
   console.log("a: ", a);
 }
 
+function clickUpgradesBought(a) {
+  buttonCheck(a);
+  if (
+    document
+      .getElementsByClassName("buyBtn")
+      [a].classList.contains("affordable") === true &&
+    MultiClickUpgrades[a]["owned"] === false
+  ) {
+    cookieClickMulti =
+      cookieClickMulti * Number(MultiClickUpgrades[a]["increase"]);
+    cookieCount = cookieCount - Number(MultiClickUpgrades[a]["cost"]);
+    MultiClickUpgrades[a]["owned"] = true;
+    document.getElementsByClassName(`buyBtn ${a}`)[0].classList.add("bought");
+  }
+}
+
 document.getElementById("clicker").addEventListener("click", () => {
   cookieCount = cookieCount + cookieClickMulti;
   update();
 });
 
-/*document
-  .getElementsByClassName(`buyBtn ${i}`)[0]
-  .addEventListener("click", (event) => {
-    console.log("w");
-    upgradePeopleUpgrades(event.target.classList[1]);
-  });
-*/
+document.getElementById("buildings").addEventListener("click", () => {
+  if (
+    document.getElementById("buildings").classList.contains("active") === false
+  ) {
+    upgradeDiv.replaceChildren();
+    document.getElementById("clickUpgrades").classList.remove("active");
+    document.getElementById("settings").classList.remove("active");
+    builingsToPage();
+  }
+});
+
+document.getElementById("clickUpgrades").addEventListener("click", () => {
+  if (
+    document.getElementById("clickUpgrades").classList.contains("active") ===
+    false
+  ) {
+    upgradeDiv.replaceChildren();
+    document.getElementById("buildings").classList.remove("active");
+    document.getElementById("settings").classList.remove("active");
+    upgradesToPage();
+  }
+});
+
+document.getElementById("settings").addEventListener("click", () => {
+  if (
+    document.getElementById("settings").classList.contains("active") === false
+  ) {
+    upgradeDiv.replaceChildren();
+    document.getElementById("clickUpgrades").classList.remove("active");
+    document.getElementById("buildings").classList.remove("active");
+    settingsToPage();
+  }
+});
