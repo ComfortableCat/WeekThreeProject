@@ -1,4 +1,26 @@
-let MultiClickUpgrades = JSON.parse(
+const icons = [
+  [
+    "./images/pointer.webp",
+    "./images/furnace.webp",
+    "./images/Diamond_Hoe.webp",
+    "./images/baker.webp",
+    "./images/factory.webp",
+    "./images/flour.webp",
+    "./images/clock.webp",
+    "./images/Quantum.webp",
+    "./images/alien.webp",
+    "./images/interdimensional.webp",
+  ],
+  [],
+];
+const audios = { clickCookie: "./audio/plastic-crunch-83779.wav" };
+const upgradeDiv = document.getElementById("upgradeContainer");
+const cookieCountDisplay = document.getElementById("cookieCount");
+const cpsCountDisplay = document.getElementById("cpsCount");
+const costIncreasePercent = 102;
+
+//retrieve from local
+const MultiClickUpgrades = JSON.parse(
   localStorage.getItem("MultiClickUpgrades")
 ) || [
   { id: 1, name: "Double tap", cost: "150", increase: 2, owned: false },
@@ -7,22 +29,6 @@ let MultiClickUpgrades = JSON.parse(
   { id: 4, name: "Carpell tapper", cost: "5000", increase: 2, owned: false },
   { id: 5, name: "Godly taps", cost: "15000", increase: 2.5, owned: false },
 ];
-const icons = [
-  "./images/pointer.webp",
-  "./images/furnace.webp",
-  "./images/Diamond_Hoe.webp",
-  "./images/baker.webp",
-  "./images/factory.webp",
-  "./images/flour.webp",
-  "./images/clock.webp",
-];
-
-const upgradeDiv = document.getElementById("upgradeContainer");
-const cookieCountDisplay = document.getElementById("cookieCount");
-const cpsCountDisplay = document.getElementById("cpsCount");
-const costIncreasePercent = 102;
-
-//retrieve from local
 let localUpgrades = JSON.parse(localStorage.getItem("localUpgrades"));
 let cps = JSON.parse(localStorage.getItem("cps")) || 0;
 let cookieCount = JSON.parse(localStorage.getItem("cookieCount")) || 0;
@@ -32,7 +38,12 @@ let preferences = JSON.parse(localStorage.getItem("preferences")) || {
   dark: true,
   volume: 80,
 };
-
+for (const audio in audios) {
+  const sound = document.createElement("audio");
+  sound.src = audios[audio];
+  sound.id = audio;
+  document.body.appendChild(sound);
+}
 if (localUpgrades) {
   console.log("there is local data");
   builingsToPage();
@@ -40,6 +51,7 @@ if (localUpgrades) {
   loadUpgradeAPI();
   console.log(localUpgrades);
 }
+updatePreferences();
 
 let cpsUpdate = setInterval(() => {
   cookieCount = Number(
@@ -93,7 +105,7 @@ function builingsToPage() {
     count.classList.add("count");
     name.textContent = localUpgrades[i]["name"];
     img.alt = localUpgrades[i]["name"];
-    img.src = icons[i];
+    img.src = icons[0][i];
     cost.textContent = `Cost: ${localUpgrades[i]["cost"]}`;
     count.textContent = localUpgrades[i]["count"];
     btn.appendChild(img);
@@ -109,6 +121,7 @@ function builingsToPage() {
     });
   }
   document.getElementById("buildings").classList.add("active");
+  update();
 }
 
 function upgradesToPage() {
@@ -124,7 +137,7 @@ function upgradesToPage() {
     cost.classList.add("cost");
     name.textContent = MultiClickUpgrades[i]["name"];
     img.alt = MultiClickUpgrades[i]["name"];
-    img.src = icons[i];
+    img.src = icons[1][i];
     cost.textContent = `Cost: ${MultiClickUpgrades[i]["cost"]}`;
     btn.appendChild(img);
     textCont.appendChild(name);
@@ -133,7 +146,6 @@ function upgradesToPage() {
     upgradeDiv.appendChild(btn);
 
     btn.addEventListener("click", (event) => {
-      console.log("clicked btn", event);
       clickUpgradesBought(event.currentTarget.classList[1]);
     });
 
@@ -142,6 +154,7 @@ function upgradesToPage() {
     }
   }
   document.getElementById("clickUpgrades").classList.add("active");
+  update();
 }
 
 function settingsToPage() {
@@ -149,9 +162,19 @@ function settingsToPage() {
   const saveBtn = document.createElement("button");
   const resetBtn = document.createElement("button");
   const themeBtn = document.createElement("button");
+  const volP = document.createElement("p");
+  const vol = document.createElement("input");
+  volP.id = "volumeDisplay";
+  vol.id = "volumeSlider";
   saveBtn.id = "saveBtn";
   resetBtn.id = "reset";
   themeBtn.id = "theme";
+  vol.type = "range";
+  vol.min = 0;
+  vol.max = 100;
+  vol.step = 5;
+  vol.value = Number(preferences["volume"]);
+  volP.textContent = "Volume: " + vol.value;
   saveBtn.textContent = "Manual Save";
   resetBtn.textContent = "Reset Game";
   themeBtn.textContent = "Change theme";
@@ -165,13 +188,32 @@ function settingsToPage() {
     location.reload();
   });
   themeBtn.addEventListener("click", () => {
-    document.body.classList.toggle("dark");
+    preferences["dark"] = !preferences["dark"];
+    updatePreferences();
   });
+  vol.addEventListener("change", changeVolume);
   settingDiv.appendChild(saveBtn);
   settingDiv.appendChild(resetBtn);
   settingDiv.appendChild(themeBtn);
+  settingDiv.appendChild(volP);
+  settingDiv.appendChild(vol);
   upgradeDiv.appendChild(settingDiv);
   document.getElementById("settings").classList.add("active");
+  update();
+}
+function changeVolume() {
+  preferences["volume"] = document.getElementById("volumeSlider").value;
+  document.getElementById("volumeDisplay").textContent =
+    "Volume: " + preferences["volume"];
+  updatePreferences();
+}
+function updatePreferences() {
+  Audio.volume = preferences["volume"];
+  if (preferences["dark"] === false) {
+    document.body.classList.remove("dark");
+  } else {
+    document.body.classList.add("dark");
+  }
 }
 function update() {
   cookieCountDisplay.textContent = cookieCount;
@@ -253,9 +295,20 @@ function clickUpgradesBought(a) {
     document.getElementsByClassName(`buyBtn ${a}`)[0].classList.add("bought");
   }
 }
+function clickShrink() {
+  document.getElementById("clicker").style.transform = "scale(1)";
+  console.log("Interval resized");
+}
+function playAudio(a) {
+  document.getElementById(a).currentTime = 0;
+  document.getElementById(a).play();
+}
 
 document.getElementById("clicker").addEventListener("click", () => {
+  document.getElementById("clicker").style.transform = "scale(0.98)";
+  let x = setTimeout(clickShrink, 100);
   cookieCount = cookieCount + cookieClickMulti;
+  playAudio("clickCookie");
   update();
 });
 
