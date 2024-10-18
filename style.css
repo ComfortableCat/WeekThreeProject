@@ -12,6 +12,7 @@ body {
   flex-direction: column;
 }
 #cookieAndInfo {
+  height: 60vh;
   width: 100%;
   z-index: 999;
   display: flex;
@@ -26,6 +27,7 @@ h1 {
   margin: 2px;
 }
 #upgradeContainer {
+  height: 30vh;
   overflow: scroll;
   display: flex;
   flex-direction: column;
@@ -40,7 +42,7 @@ p {
 
 .buyBtn.affordable {
   background-color: aqua;
-  background-image: url(./images/chocolateChip.jpg);
+  background-image: url(./images/chocolateChip.webp);
 }
 
 #navContainer {
@@ -53,6 +55,7 @@ p {
 }
 
 nav {
+  border-radius: 10px;
   height: inherit;
   width: inherit;
   display: flex;
@@ -65,7 +68,7 @@ nav button {
   height: 100%;
   width: 100%;
   background-color: transparent;
-  background-image: url(./images/waffleCookie.jpg);
+  background-image: url(./images/waffleCookie.webp);
   background-size: 33.33vw 10vh;
   background-position: center;
   background-repeat: no-repeat;

@@ -12,8 +12,8 @@ const icons = [
   "./images/furnace.webp",
   "./images/Diamond_Hoe.webp",
   "./images/baker.webp",
-  "./images/factory.png",
-  "./images/flour.png",
+  "./images/factory.webp",
+  "./images/flour.webp",
   "./images/clock.webp",
 ];
 
