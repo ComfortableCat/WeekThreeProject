@@ -13,7 +13,10 @@ const icons = [
   ],
   [],
 ];
-const audios = { clickCookie: "./audio/plastic-crunch-83779.wav" };
+const audios = {
+  clickCookie: "./audio/plastic-crunch-83779.wav",
+  save: "./audio/save_choirboy_2-modific-96757.mp3",
+};
 const upgradeDiv = document.getElementById("upgradeContainer");
 const cookieCountDisplay = document.getElementById("cookieCount");
 const cpsCountDisplay = document.getElementById("cpsCount");
@@ -45,11 +48,9 @@ for (const audio in audios) {
   document.body.appendChild(sound);
 }
 if (localUpgrades) {
-  console.log("there is local data");
   builingsToPage();
 } else {
   loadUpgradeAPI();
-  console.log(localUpgrades);
 }
 updatePreferences();
 
@@ -72,7 +73,6 @@ async function loadUpgradeAPI() {
   for (let i = 0; i < upgrades.length; i++) {
     localUpgrades[i].count = "0";
     localUpgrades[i]["currentCost"] = localUpgrades[i]["cost"];
-    console.log("Set currentCost", i);
   }
   builingsToPage();
   saveToLocal();
@@ -116,7 +116,6 @@ function builingsToPage() {
     upgradeDiv.appendChild(btn);
 
     btn.addEventListener("click", (event) => {
-      console.log("clicked btn", event);
       upgradePeopleUpgrades(event.currentTarget.classList[1]);
     });
   }
@@ -180,6 +179,7 @@ function settingsToPage() {
   themeBtn.textContent = "Change theme";
   saveBtn.addEventListener("click", () => {
     saveToLocal();
+    playAudio("save");
     alert("Game Saved to Local Storage");
   });
   resetBtn.addEventListener("click", () => {
@@ -201,20 +201,7 @@ function settingsToPage() {
   document.getElementById("settings").classList.add("active");
   update();
 }
-function changeVolume() {
-  preferences["volume"] = document.getElementById("volumeSlider").value;
-  document.getElementById("volumeDisplay").textContent =
-    "Volume: " + preferences["volume"];
-  updatePreferences();
-}
-function updatePreferences() {
-  Audio.volume = preferences["volume"];
-  if (preferences["dark"] === false) {
-    document.body.classList.remove("dark");
-  } else {
-    document.body.classList.add("dark");
-  }
-}
+
 function update() {
   cookieCountDisplay.textContent = cookieCount;
   cpsCountDisplay.textContent = cps;
@@ -234,6 +221,7 @@ function update() {
       buttonCheck(i);
     }
   }
+  audioVolumes();
 }
 
 function buttonCheck(a) {
@@ -251,10 +239,33 @@ function buttonCheck(a) {
         [a].classList.contains("affordable") === false
     ) {
       document.getElementsByClassName("buyBtn")[a].classList.add("affordable");
-      console.log("changed state");
     }
   } else {
     document.getElementsByClassName("buyBtn")[a].classList.remove("affordable");
+  }
+}
+function updatePreferences() {
+  document.querySelectorAll("audio").volume = preferences["volume"];
+  if (preferences["dark"] === false) {
+    document.body.classList.remove("dark");
+  } else {
+    document.body.classList.add("dark");
+  }
+}
+function changeVolume() {
+  preferences["volume"] = document.getElementById("volumeSlider").value;
+  document.getElementById("volumeDisplay").textContent =
+    "Volume: " + preferences["volume"];
+  updatePreferences();
+}
+function playAudio(a) {
+  document.getElementById(a).currentTime = 0;
+  document.getElementById(a).play();
+}
+function audioVolumes() {
+  const audio = document.querySelectorAll("audio");
+  for (let i = 0; i < audio.length; i++) {
+    audio[i].volume = preferences["volume"] / 100;
   }
 }
 
@@ -277,7 +288,6 @@ function upgradePeopleUpgrades(a) {
       a
     ].textContent = `Cost: ${localUpgrades[a]["currentCost"]}`;
   }
-  console.log("a: ", a);
 }
 
 function clickUpgradesBought(a) {
@@ -297,11 +307,6 @@ function clickUpgradesBought(a) {
 }
 function clickShrink() {
   document.getElementById("clicker").style.transform = "scale(1)";
-  console.log("Interval resized");
-}
-function playAudio(a) {
-  document.getElementById(a).currentTime = 0;
-  document.getElementById(a).play();
 }
 
 document.getElementById("clicker").addEventListener("click", () => {
